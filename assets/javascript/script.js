@@ -168,15 +168,16 @@ $(document).ready(function(){
             game.playerOneName = user.name;
             game.lossesPlayerOne = user.losses;
             game.winsPlayerOne = user.wins;
+            game.populate();
         }
     });
     userTwo.on("value", function (snapshot) {
-        console.log(snapshot.val());
-        var userTwo = snapshot.val();
-        game.playerTwoName = userTwo.name;
-        game.lossesPlayerTwo = userTwo.losses;
-        game.winsPlayerTwo = userTwo.wins;
-        game.populate();
+        if (snapshot.val()){
+            var userTwo = snapshot.val();
+            game.playerTwoName = userTwo.name;
+            game.lossesPlayerTwo = userTwo.losses;
+            game.winsPlayerTwo = userTwo.wins;
+            game.populate();}
     });
     chatDB.on("child_added", function (snapshot) {
         var newLine = $("<div>").text(snapshot.val());
