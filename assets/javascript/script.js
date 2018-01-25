@@ -75,6 +75,7 @@ $(document).ready(function(){
                         losses: game.lossesPlayerOne
                 });
                 game.isPlayerOne = true;
+                console.log(game.isPlayerOne);
             }
             else {
                 game.playerTwoName = name;
@@ -84,6 +85,7 @@ $(document).ready(function(){
                         losses: game.lossesPlayerTwo
                 });
                 game.isPlayerTwo = true;
+                console.log(game.isPlayerTwo);
             }
             game.populate();
         },
@@ -188,14 +190,16 @@ $(document).ready(function(){
     });
     // When the client's connection state changes...
     connectedRef.on("value", function (snap) {
-        if (snap.val() && game.isPlayerOne === true) {
+        if (snap.val()){
+            if (game.isPlayerOne === true) {
             userOne.onDisconnect().remove();
-        }
-        else if (snap.val() && game.isPlayerTwo === true) {
+            }
+            else if (game.isPlayerTwo === true) {
             userTwo.onDisconnect().remove();
-        }
-        else {
-            console.log("Hi!")
+            }
+            else {
+                console.log("Hi!")
+            }
         }
     });
 
