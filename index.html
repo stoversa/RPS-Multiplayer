@@ -12,7 +12,7 @@
 <body>
     <div class="container">
         <div class="row">
-            <div class="jumbotron col-lg-12">
+            <div class="well col-lg-12">
                 <h1 class="text-center">Rock, Paper, Scissors</h1>
                 <div class="text-center">Ultimate challenge</div>
                 <br/>
@@ -33,15 +33,16 @@
                         <h3 class="panel-title text-center player-one-title">Waiting on Player 1</h3>
                     </div>
                     <div class="panel-body text-center">
+                        <img class="img-responsive player-one-img hidden" src="assets/images/like-2935406_1280.png">
                         <div class="player-one-choice"></div>
                         <div class="player-one-options hidden">
                             <div class="text-center">Player choices:</div>
                             <div class="btn-group" role="group" aria-label="...">
-                                <button type="button" class="btn btn-default btn-lg btn-rps" data="rock">
+                                <button type="button" class="btn btn-default btn-lg btn-rps" data="rock" player="one">
                                     <span class="glyphicon glyphicon-stop" aria-hidden="true"></span> Rock</button>
-                                <button type="button" class="btn btn-default btn-lg btn-rps" data="paper">
+                                <button type="button" class="btn btn-default btn-lg btn-rps" data="paper" player="one">
                                     <span class="glyphicon glyphicon-duplicate" aria-hidden="true"></span> Paper</button>
-                                <button type="button" class="btn btn-default btn-lg btn-rps" data="scissors">
+                                <button type="button" class="btn btn-default btn-lg btn-rps" data="scissors" player="one">
                                     <span class="glyphicon glyphicon-scissors" aria-hidden="true"></span> Scissors</button>
                             </div>
                         </div>
@@ -51,7 +52,7 @@
             <div class="col-lg-4">
                 <div class="panel panel-default">
                     <div class="panel-body">
-                        Basic panel example
+                        <img class="img-responsive" src="assets/images/fingers-149295_1280.png">
                     </div>
                 </div>
             </div>
@@ -61,7 +62,19 @@
                         <h3 class="panel-title text-center player-two-title">Waiting on Player 2</h3>
                     </div>
                     <div class="panel-body text-center">
-                        Panel content
+                        <img class="img-responsive player-two-img hidden" src="assets/images/like-2935406_1280.png">
+                        <div class="player-two-choice"></div>
+                        <div class="player-two-options hidden">
+                            <div class="text-center">Player choices:</div>
+                            <div class="btn-group" role="group" aria-label="...">
+                                <button type="button" class="btn btn-default btn-lg btn-rps" data="rock" player="two">
+                                    <span class="glyphicon glyphicon-stop" aria-hidden="true"></span> Rock</button>
+                                <button type="button" class="btn btn-default btn-lg btn-rps" data="paper" player="two">
+                                    <span class="glyphicon glyphicon-duplicate" aria-hidden="true"></span> Paper</button>
+                                <button type="button" class="btn btn-default btn-lg btn-rps" data="scissors" player="two">
+                                    <span class="glyphicon glyphicon-scissors" aria-hidden="true"></span> Scissors</button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -74,7 +87,7 @@
                 <div class="panel-body chat-text">
                     <div class="chat-area">
                     </div>
-                    
+
                 </div>
                 <div class="panel-footer">
                     <div class="input-group">
@@ -91,7 +104,7 @@
         <!-- Modal -->
         <div class="modal fade" id="myModal" role="dialog">
             <div class="modal-dialog">
-        
+
                 <!-- Modal content-->
                 <div class="modal-content">
                     <div class="modal-header">
@@ -105,7 +118,7 @@
                         <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
                     </div>
                 </div>
-        
+
             </div>
         </div>
 
