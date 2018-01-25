@@ -10,11 +10,13 @@ $(document).ready(function(){
     };
     firebase.initializeApp(config);
     const database = firebase.database();
-    const usersOne = database.ref("user1");
+    const userOne = database.ref("user1");
     const userTwo = database.ref("user2");
     const chatDB = database.ref("chat");
 
     var game = {
+        isPlayerOne: false,
+        isPlayerTwo: false,
         playerOneName: "",
         playerTwoName: "",
         choicePlayerOne: "",
@@ -39,17 +41,16 @@ $(document).ready(function(){
                 $("#chat-input").val("");
                 chatDB.push(game.playerOneName + ": " + chatText);
                 $(".chat-area").empty();
-                game.populateChat();
             }
         }, 
         populate: function (){
             if (game.playerOneName !== ""){
-                $(".player-one-title").text(game.playerOneName);
+                $(".player-one-title").text(game.playerOneName + "   Wins: " + game.winsPlayerOne + " / Losses: " + game.lossesPlayerOne);
                 $(".player-one-img").removeClass("hidden");
             }
 
             if (game.playerTwoName !== "") {
-                $(".player-two-title").text(game.playerTwoName);
+                $(".player-two-title").text(game.playerTwoName + "   Wins: " + game.winsPlayerTwo + " / Losses: " + game.lossesPlayerTwo);
                 $(".player-two-img").removeClass("hidden");
             }
 
@@ -61,16 +62,6 @@ $(document).ready(function(){
                 $(".player-two-options").removeClass("hidden");
             };
         },
-        populateChat: function(){
-            chatDB.on("child_added", function (snapshot) {
-                var newLine = $("<div>").text(snapshot.val());
-                $(".chat-area").prepend(newLine);
-            }, function (err) {
-                // Handle errors
-                console.log("Error: ", err.code);
-            });
-        },
-
         beginGame: function(){
             var name = $("#name-input").val().trim(); //grabs the name user inputs
             $("#name-input").val("");
@@ -81,6 +72,7 @@ $(document).ready(function(){
                         wins: game.winsPlayerOne,
                         losses: game.lossesPlayerOne
                 });
+                
             }
             else {
                 game.playerTwoName = name;
@@ -91,6 +83,18 @@ $(document).ready(function(){
                 });
             }
             game.populate();
+        },
+        setPlayers: function(){
+            userOne.set({
+                name: game.playerOneName,
+                wins: game.winsPlayerOne,
+                losses: game.lossesPlayerOne
+            });
+            userTwo.set({
+                name: game.playerTwoName,
+                wins: game.winsPlayerTwo,
+                losses: game.lossesPlayerTwo
+            });
         },
         logChoice: function(){
             var userChoice = $(this).attr("data");
@@ -141,6 +145,7 @@ $(document).ready(function(){
                 } else if (game.choicePlayerOne === game.choicePlayerTwo) {
                     results.text("It's a tie!");
                 };
+                game.setPlayers();
                 setTimeout(game.reset, 3000);
             }
         },
@@ -155,9 +160,29 @@ $(document).ready(function(){
         }
     };
 
+    userOne.on("value", function (snapshot) {
+        console.log(snapshot.val());
+        var user = snapshot.val();
+        game.playerOneName = user.name;
+        game.lossesPlayerOne = user.losses;
+        game.winsPlayerOne = user.wins;
 
-    game.populate();
-    game.populateChat();
+    });
+    userTwo.on("value", function (snapshot) {
+        console.log(snapshot.val());
+        var userTwo = snapshot.val();
+        game.playerTwoName = userTwo.name;
+        game.lossesPlayerTwo = userTwo.losses;
+        game.winsPlayerTwo = userTwo.wins;
+        game.populate();
+    });
+    chatDB.on("child_added", function (snapshot) {
+        var newLine = $("<div>").text(snapshot.val());
+        $(".chat-area").prepend(newLine);
+    }, function (err) {
+        // Handle errors
+        console.log("Error: ", err.code);
+    });
     $(".btn-name").click(game.beginGame);
     $(".btn-chat").click(game.addChat);
     $(".btn-rps").click(game.logChoice);
