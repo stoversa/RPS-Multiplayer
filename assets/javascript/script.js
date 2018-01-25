@@ -13,6 +13,8 @@ $(document).ready(function(){
     const userOne = database.ref("user1");
     const userTwo = database.ref("user2");
     const chatDB = database.ref("chat");
+    const connectedRef = database.ref(".info/connected");
+
 
     var game = {
         isPlayerOne: false,
@@ -67,12 +69,12 @@ $(document).ready(function(){
             $("#name-input").val("");
             if (game.playerOneName === ""){
                 game.playerOneName = name;
-                usersOne.set({
+                userOne.set({
                         name: game.playerOneName,
                         wins: game.winsPlayerOne,
                         losses: game.lossesPlayerOne
                 });
-                
+                game.isPlayerOne = true;
             }
             else {
                 game.playerTwoName = name;
@@ -81,6 +83,7 @@ $(document).ready(function(){
                         wins: game.winsPlayerTwo,
                         losses: game.lossesPlayerTwo
                 });
+                game.isPlayerTwo = true;
             }
             game.populate();
         },
@@ -155,18 +158,17 @@ $(document).ready(function(){
             game.choicePlayerTwo = "";
             $("#placeholder-img").show();
             $("#win-text").remove();
-            $(".player-one-options").removeClass("hidden");
-            $(".player-two-options").removeClass("hidden");
+            game.populate();
         }
     };
 
     userOne.on("value", function (snapshot) {
-        console.log(snapshot.val());
-        var user = snapshot.val();
-        game.playerOneName = user.name;
-        game.lossesPlayerOne = user.losses;
-        game.winsPlayerOne = user.wins;
-
+        if (snapshot.val()){
+            var user = snapshot.val();
+            game.playerOneName = user.name;
+            game.lossesPlayerOne = user.losses;
+            game.winsPlayerOne = user.wins;
+        }
     });
     userTwo.on("value", function (snapshot) {
         console.log(snapshot.val());
@@ -183,6 +185,19 @@ $(document).ready(function(){
         // Handle errors
         console.log("Error: ", err.code);
     });
+    // When the client's connection state changes...
+    connectedRef.on("value", function (snap) {
+        if (snap.val() && game.isPlayerOne === true) {
+            userOne.onDisconnect().remove();
+        }
+        else if (snap.val() && game.isPlayerTwo === true) {
+            userTwo.onDisconnect().remove();
+        }
+        else {
+            console.log("Hi!")
+        }
+    });
+
     $(".btn-name").click(game.beginGame);
     $(".btn-chat").click(game.addChat);
     $(".btn-rps").click(game.logChoice);
