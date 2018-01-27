@@ -105,7 +105,7 @@ var game = {
         }
         game.populate();
     },
-    setPlayers: function () {
+    updatePlayers: function () {
         userOne.update({
             wins: game.winsPlayerOne,
             losses: game.lossesPlayerOne
@@ -125,6 +125,7 @@ var game = {
             userOne.update({
                 choice: userChoice
             });
+            game.checkScores();
         }
         else if (isPlayerTwo) {
             $(".player-two-options").hide();
@@ -135,13 +136,13 @@ var game = {
             userTwo.update({
                 choice: userChoice
             });
-        }
-        if (game.choicePlayerOne != "" && game.choicePlayerTwo != "") {
-            game.gradeGame();
+            game.checkScores();
         }
     },
     gradeGame: function () {
-        game.getUserScore();
+        // game.getUserScore();
+        console.log(game.choicePlayerOne);
+        console.log(game.choicePlayerTwo);
         $("#placeholder-img").hide();
         var results = $("<h2 class='text-center' id='win-text'></h2>");
         $(".game-results").append(results);
@@ -173,7 +174,7 @@ var game = {
             } else if (game.choicePlayerOne === game.choicePlayerTwo) {
                 results.text("It's a tie!");
             };
-            game.setPlayers();
+            game.updatePlayers();
             setTimeout(game.reset, 3000);
         }
     },
@@ -185,6 +186,16 @@ var game = {
         userTwo.once("value", function (snapshot) {
             game.choicePlayerTwo = snapshot.choice;
             console.log(game.choicePlayerTwo);
+        });
+    },
+    checkScores: function(){
+        users.once("value", function (snapshot) {
+            if (snapshot.val()[1]["choice"] && snapshot.val()[2]["choice"]) {
+                console.log("grading")
+                game.choicePlayerOne = snapshot.val()[1]["choice"]
+                game.choicePlayerTwo = snapshot.val()[2]["choice"]
+                game.gradeGame();
+            }
         });
     },
     reset: function () {
