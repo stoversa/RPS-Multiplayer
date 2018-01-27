@@ -12,24 +12,34 @@ const userOne = database.ref("users/1");
 const userTwo = database.ref("users/2");
 const chatDB = database.ref("chat");
 const connectedRef = database.ref(".info/connected");
-// When the client's connection state changes...
+// Logs who has accessed page and clears their credentials when they exit
 connectedRef.on("value", function (snap) {
     if (snap.val()) {
-        if (game.isPlayerOne === true) {
-            console.log("Will disconnect p 1")
+        var one;
+        var two;
+        userOne.once("value", function (snapshot) {
+            if (snapshot.val()) {
+                two = true;
+                userTwo.onDisconnect().remove();
+                console.log("Will disconnect p 2")
+            };
+        });
+        userTwo.once("value", function (snapshot) {
+            if (snapshot.val()) {
+                one = true;
+                userOne.onDisconnect().remove();
+                console.log("Will disconnect p 1")
+            };
+        });
+        if (!one && !two) {
             userOne.onDisconnect().remove();
-        } else if (game.isPlayerTwo === true) {
-            console.log("Will disconnect p 2")
-            userTwo.onDisconnect().remove();
-        } else {
-            console.log("Not disconnecting anyone!")
-        }
+            console.log("Will disconnect p 1")
+        };
     }
 });
-
+let isPlayerOne = false;
+let isPlayerTwo = false;
 var game = {
-    isPlayerOne: false,
-    isPlayerTwo: false,
     playerOneName: "",
     playerTwoName: "",
     choicePlayerOne: "",
@@ -86,8 +96,8 @@ var game = {
                 wins: game.winsPlayerOne,
                 losses: game.lossesPlayerOne
             });
-            game.isPlayerOne = true;
-            console.log(game.isPlayerOne);
+            isPlayerOne = true;
+            console.log(isPlayerOne);
         } else {
             game.playerTwoName = name;
             userTwo.set({
@@ -95,8 +105,8 @@ var game = {
                 wins: game.winsPlayerTwo,
                 losses: game.lossesPlayerTwo
             });
-            game.isPlayerTwo = true;
-            console.log(game.isPlayerTwo);
+            isPlayerTwo = true;
+            console.log(isPlayerTwo);
         }
         game.populate();
     },
@@ -183,6 +193,7 @@ var game = {
 
 userOne.on("value", function (snapshot) {
     if (snapshot.val()) {
+        isPlayerTwo = true
         var user = snapshot.val();
         game.playerOneName = user.name;
         game.lossesPlayerOne = user.losses;
@@ -192,6 +203,7 @@ userOne.on("value", function (snapshot) {
 });
 userTwo.on("value", function (snapshot) {
     if (snapshot.val()) {
+        isPlayerOne = true
         var userTwo = snapshot.val();
         game.playerTwoName = userTwo.name;
         game.lossesPlayerTwo = userTwo.losses;
@@ -199,6 +211,8 @@ userTwo.on("value", function (snapshot) {
         game.populate();
     }
 });
+
+
 chatDB.on("child_added", function (snapshot) {
     var newLine = $("<div>").text(snapshot.val());
     $(".chat-area").prepend(newLine);
