@@ -114,6 +114,10 @@ var game = {
             wins: game.winsPlayerTwo,
             losses: game.lossesPlayerTwo
         });
+        database.ref("users/1/choice").remove();
+        database.ref("users/2/choice").remove();
+        game.choicePlayerOne = "";
+        game.choicePlayerTwo = "";
     },
     logChoice: function () {
         if (isPlayerOne) {
