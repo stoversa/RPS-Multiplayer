@@ -2,3 +2,7 @@
     max-height: 150px;
     overflow: scroll;
 }
+
+.player-one-img, .player-one-options, .player-two-img, .player-two-options {
+    display: none;
+}

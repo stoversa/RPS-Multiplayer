@@ -8,33 +8,25 @@ const config = {
 };
 firebase.initializeApp(config);
 const database = firebase.database();
+const users = database.ref("users");
 const userOne = database.ref("users/1");
 const userTwo = database.ref("users/2");
 const chatDB = database.ref("chat");
+const turnDB = database.ref("turn");
 const connectedRef = database.ref(".info/connected");
 // Logs who has accessed page and clears their credentials when they exit
 connectedRef.on("value", function (snap) {
     if (snap.val()) {
-        var one;
-        var two;
         userOne.once("value", function (snapshot) {
             if (snapshot.val()) {
-                two = true;
-                userTwo.onDisconnect().remove();
+                userTwo.onDisconnect().remove(); //disconnect two if one's already taken
                 console.log("Will disconnect p 2")
-            };
-        });
-        userTwo.once("value", function (snapshot) {
-            if (snapshot.val()) {
-                one = true;
+            }
+            else { //otherwise, remove one every time, since that's the default/first person
                 userOne.onDisconnect().remove();
                 console.log("Will disconnect p 1")
-            };
+            }
         });
-        if (!one && !two) {
-            userOne.onDisconnect().remove();
-            console.log("Will disconnect p 1")
-        };
     }
 });
 let isPlayerOne = false;
@@ -70,23 +62,28 @@ var game = {
     populate: function () {
         if (game.playerOneName !== "") {
             $(".player-one-title").text(game.playerOneName + "   Wins: " + game.winsPlayerOne + " / Losses: " + game.lossesPlayerOne);
-            $(".player-one-img").removeClass("hidden");
+            $(".player-one-img").show();
         }
 
         if (game.playerTwoName !== "") {
             $(".player-two-title").text(game.playerTwoName + "   Wins: " + game.winsPlayerTwo + " / Losses: " + game.lossesPlayerTwo);
-            $(".player-two-img").removeClass("hidden");
+            $(".player-two-img").show();
         }
 
         if (game.playerOneName != "" && game.playerTwoName != "") {
             $(".name-row").replaceWith("<div class='game-status text-center'></div>") //hides name field
-            $(".player-one-img").addClass("hidden");
-            $(".player-two-img").addClass("hidden");
-            $(".player-one-options").removeClass("hidden");
-            $(".player-two-options").removeClass("hidden");
+            $(".player-one-img").hide();
+            $(".player-two-img").hide();
+            if (isPlayerOne){
+                $(".player-one-options").show();
+            }
+            else if (isPlayerTwo) {
+                $(".player-two-options").show();
+            };
         };
     },
     beginGame: function () {
+        turnDB.set({ turn: 1 });
         var name = $("#name-input").val().trim(); //grabs the name user inputs
         $("#name-input").val("");
         if (game.playerOneName === "") {
@@ -97,7 +94,6 @@ var game = {
                 losses: game.lossesPlayerOne
             });
             isPlayerOne = true;
-            console.log(isPlayerOne);
         } else {
             game.playerTwoName = name;
             userTwo.set({
@@ -106,35 +102,34 @@ var game = {
                 losses: game.lossesPlayerTwo
             });
             isPlayerTwo = true;
-            console.log(isPlayerTwo);
         }
         game.populate();
     },
     setPlayers: function () {
-        userOne.set({
-            name: game.playerOneName,
+        userOne.update({
             wins: game.winsPlayerOne,
             losses: game.lossesPlayerOne
         });
-        userTwo.set({
-            name: game.playerTwoName,
+        userTwo.update({
             wins: game.winsPlayerTwo,
             losses: game.lossesPlayerTwo
         });
     },
     logChoice: function () {
-        var userChoice = $(this).attr("data");
-        var player = $(this).attr("player");
-        if (player === "one") {
-            $(".player-one-options").addClass("hidden");
+        if (isPlayerOne) {
+            $(".player-one-options").hide();
+            var userChoice = $(this).attr("data");
+            var player = $(this).attr("player");
             $(".player-one-choice").html("<h2>" + userChoice + "!<h2>");
             game.choicePlayerOne = userChoice;
             userOne.update({
                 choice: userChoice
             });
         }
-        if (player === "two") {
-            $(".player-two-options").addClass("hidden");
+        else if (isPlayerTwo) {
+            $(".player-two-options").hide();
+            var userChoice = $(this).attr("data");
+            var player = $(this).attr("player");
             $(".player-two-choice").html("<h2>" + userChoice + "!<h2>");
             game.choicePlayerTwo = userChoice;
             userTwo.update({
@@ -146,6 +141,7 @@ var game = {
         }
     },
     gradeGame: function () {
+        game.getUserScore();
         $("#placeholder-img").hide();
         var results = $("<h2 class='text-center' id='win-text'></h2>");
         $(".game-results").append(results);
@@ -181,6 +177,16 @@ var game = {
             setTimeout(game.reset, 3000);
         }
     },
+    getUserScore: function(){
+        userOne.once("value", function (snapshot) {
+            game.choicePlayerOne = snapshot.choice;
+            console.log(game.choicePlayerOne);
+        });
+        userTwo.once("value", function (snapshot) {
+            game.choicePlayerTwo = snapshot.choice;
+            console.log(game.choicePlayerTwo);
+        });
+    },
     reset: function () {
         $(".choice").text("");
         game.choicePlayerOne = "";
@@ -189,11 +195,10 @@ var game = {
         $("#win-text").remove();
         game.populate();
     }
-};
+}; //end game object
 
 userOne.on("value", function (snapshot) {
     if (snapshot.val()) {
-        isPlayerTwo = true
         var user = snapshot.val();
         game.playerOneName = user.name;
         game.lossesPlayerOne = user.losses;
@@ -203,7 +208,6 @@ userOne.on("value", function (snapshot) {
 });
 userTwo.on("value", function (snapshot) {
     if (snapshot.val()) {
-        isPlayerOne = true
         var userTwo = snapshot.val();
         game.playerTwoName = userTwo.name;
         game.lossesPlayerTwo = userTwo.losses;
